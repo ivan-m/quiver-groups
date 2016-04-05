@@ -29,7 +29,7 @@ spaccum :: (a -> p)
               -- to a complete accumulation.  If this function returns
               -- @'Nothing'@ then the final partial accumulation is
               -- returned using 'spfailed'.
-           -> SP a g m p
+           -> SP a g f p
 spaccum mkInit addA finalise = createNewAccum
   where
     createNewAccum = spconsume newAccumFrom spcomplete
@@ -45,3 +45,10 @@ spaccum mkInit addA finalise = createNewAccum
                                                spincomplete
 
     finalisePartial p = maybe (spfailed p) spemit (finalise p)
+
+-- | As with 'spaccum' but the finalisation function always succeeds
+spaccum' :: (Functor f) => (a -> p) -> (p -> a -> Either p (g, Maybe a)) -> (p -> g) -> SP a g f ()
+spaccum' mkInit addA finalise = spaccum mkInit addA (Just . finalise) >&> fmap (fmap (const ()))
+{-# ANN spaccum' "HLint: ignore Use void" #-}
+-- Don't want to use 'void' to make sure the 'SPResult' is maintained.
+
