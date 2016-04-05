@@ -73,3 +73,29 @@ spgroupBy f = spaccum' mkInit addA finalise
       | otherwise = Right (D.toList d, Just a')
 
     finalise = D.toList . snd
+
+--------------------------------------------------------------------------------
+
+-- | Collect the elements into lists of the specified size (though the
+-- last such may be shorter).
+--
+-- A length that is @<= 0@ will return 'spcomplete' (that is, no
+-- outputs will be produced).
+chunksOf :: (Functor f) => Int -> SP a [a] f ()
+chunksOf n
+  | n <= 0    = spcomplete
+  | n == 1    = sppure (:[]) -- Required for the INVARIANT below to be correct
+  | otherwise = spaccum' mkInit addA finalise
+  where
+    mkInit a = (n', D.singleton a)
+    n' = pred n -- n' is >= 1
+
+    -- INVARIANT: c >= 1
+    addA (c,d) a
+      | c' <= 0   = Right (D.toList d', Nothing)
+      | otherwise = Left (c', d')
+      where
+        c' = pred c
+        d' = d `D.snoc` a
+
+    finalise = D.toList . snd
