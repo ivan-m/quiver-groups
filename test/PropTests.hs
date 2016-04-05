@@ -9,7 +9,7 @@
 
 
  -}
-module PropTests (main) where
+module Main (main) where
 
 import Control.Quiver.Group
 
