@@ -79,10 +79,10 @@ spgroupBy f = spaccum' mkInit addA finalise
 -- | Collect the elements into lists of the specified size (though the
 -- last such may be shorter).
 --
--- A length that is @<= 0@ will return 'spcomplete' (that is, no
--- outputs will be produced).
-chunksOf :: (Functor f) => Int -> SP a [a] f ()
-chunksOf n
+-- A size that is @<= 0@ will return 'spcomplete' (that is, no outputs
+-- will be produced).
+spchunks :: (Functor f) => Int -> SP a [a] f ()
+spchunks n
   | n <= 0    = spcomplete
   | n == 1    = sppure (:[]) -- Required for the INVARIANT below to be correct
   | otherwise = spaccum' mkInit addA finalise
