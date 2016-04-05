@@ -13,6 +13,9 @@ module Control.Quiver.Group where
 
 import Control.Quiver.SP
 
+import           Control.Arrow (second)
+import qualified Data.DList    as D
+
 --------------------------------------------------------------------------------
 
 -- | Accumulate values within a Quiver.
@@ -52,3 +55,21 @@ spaccum' mkInit addA finalise = spaccum mkInit addA (Just . finalise) >&> fmap (
 {-# ANN spaccum' "HLint: ignore Use void" #-}
 -- Don't want to use 'void' to make sure the 'SPResult' is maintained.
 
+--------------------------------------------------------------------------------
+
+-- | Collect consecutive equal elements together.
+spgroup :: (Eq a, Functor f) => SP a [a] f ()
+spgroup = spgroupBy (==)
+
+-- | Collect consecutive elements together that satisfy the provided
+-- function.
+spgroupBy :: (Functor f) => (a -> a -> Bool) -> SP a [a] f ()
+spgroupBy f = spaccum' mkInit addA finalise
+  where
+    mkInit a = (a, D.singleton a)
+
+    addA p@(a, d) a'
+      | f a a'    = Left (second (`D.snoc` a') p)
+      | otherwise = Right (D.toList d, Just a')
+
+    finalise = D.toList . snd
