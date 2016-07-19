@@ -37,7 +37,7 @@ test-suite properties
                      , base
                      , quiver
 
-                     , QuickCheck >= 2.5 && < 2.9
+                     , QuickCheck >= 2.5 && < 2.10
                        -- Just to make it nicer to write
                      , hspec >= 2.1 && < 2.3
   hs-source-dirs:      test
